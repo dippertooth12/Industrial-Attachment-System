@@ -24,8 +24,8 @@ const StudentLogin = () => {
       });
       setMessage(response.data.message);
 
-      if (response.status === 200) { // ✅ Check HTTP status instead of `response.data.success`
-        localStorage.setItem("student_id", response.data.student_id); // Store login state
+      if (response.status === 200) {
+        localStorage.setItem("student_id", formData.student_id); // ✅ FIX: use formData
         navigate("/dashboard");
       }
     } catch (error) {
