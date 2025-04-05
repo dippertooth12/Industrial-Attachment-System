@@ -5,6 +5,7 @@ import {BrowserRouter as Router, Routes,Route } from "react-router-dom";
 import StudentLogin from "./components/studentlogin";
 import Dashboard from "./components/Dashboard";
 import Homepage from './components/Homepage';
+import StudentPreferenceForm from './Preferenceform'
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Route path="/login" element={<StudentLogin/>} />
           <Route path="/register" element={<StudentRegister/>} />
           <Route path="/dashboard" element={<Dashboard/>}/>
+          <Route path="/submit-preference" element={<StudentPreferenceForm />} />
           {/* You can add more routes here*/}
         </Routes>
     </Router>

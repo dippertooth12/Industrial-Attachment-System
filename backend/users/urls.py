@@ -8,7 +8,7 @@ from django.views.generic import TemplateView
 urlpatterns = [
     path('register/student/', register_student),
     path('login/student/', login_student),
-     #path('api/student-preference/', create_student_preference),
+    path('api/student-preference/', create_student_preference),
      path('dashboard/', TemplateView.as_view(template_name="index.html")),
 ]
     
