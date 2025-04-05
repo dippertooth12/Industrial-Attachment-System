@@ -11,33 +11,30 @@ class Student(models.Model):
     password = models.CharField(max_length=255)
     
 class StudentPreference(models.Model):
+    student_pref_id = models.CharField(primary_key=True, max_length=20)
     student= models.ForeignKey(Student, on_delete=models.CASCADE)
-    availabefrom=models.DateField()
-    availabeto=models.DateField()
+    pref_location = models.CharField(max_length=100)
+    available_from = models.DateField()
+    available_to = models.DateField()
 
-class StudentPreferenceField(models.Model):
-    student_preference = models.ForeignKey(StudentPreference, on_delete=models.CASCADE)
-    organisation_name=models.CharField(max_length=100)
-    field=models.CharField(max_length=100)
+class Industry(models.Model):
+    industry_id = models.CharField(primary_key=True, max_length=20)
+    name = models.CharField(max_length=100)   
 
+class PreferredIndustry(models.Model):
+    student_pref = models.ForeignKey(StudentPreference, on_delete=models.CASCADE)
+    industry = models.ForeignKey(Industry, on_delete=models.CASCADE)
 
+    class Meta:
+        unique_together = ('student_pref', 'industry')
+        
+class Skill(models.Model):
+    skill_id = models.CharField(primary_key=True, max_length=20)
+    name = models.CharField(max_length=100)
 
-class Organization(models.Model):
-    Org_id= models.CharField(max_length=100,unique=True,primary_key=True)
-    org_name = models.CharField(max_length=100)
-    contact_email = models.EmailField(unique=True)
-    contact_number = models.CharField(max_length=15, unique=True)
-    address = models.TextField()
-    password = models.CharField(max_length=255)
+class DesiredSkill(models.Model):
+    student_pref = models.ForeignKey(StudentPreference, on_delete=models.CASCADE)
+    skill = models.ForeignKey(Skill, on_delete=models.CASCADE)
 
-class OrganizationPreference(models.Model):
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
-    positions_available=models.CharField(max_length=100)
-    prefered_education_level=models.CharField(max_length=100)
-    startDate=models.DateField()
-    endDate=models.DateField()
-
-class OrgpreferenceField(models.Model):
-    preference = models.ForeignKey(OrganizationPreference, on_delete=models.CASCADE)
-    prefereed_field=models.CharField(max_length=100)
-
+    class Meta:
+        unique_together = ('student_pref', 'skill')
