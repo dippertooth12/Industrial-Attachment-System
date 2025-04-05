@@ -1,109 +1,162 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 const StudentPreferenceForm = () => {
   const [formData, setFormData] = useState({
-    student_id: '',
-    student_pref_id: '',
-    pref_location: '',
-    available_from: '',
-    available_to: ''
+    student_pref_id: "",
+    student_id: localStorage.getItem("student_id") || "",
+    pref_location: "",
+    available_from: "",
+    available_to: "",
+    industries: [],
+    skills: [],
   });
 
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState('');
+  const [industryOptions, setIndustryOptions] = useState([]);
+  const [skillOptions, setSkillOptions] = useState([]);
+  const [message, setMessage] = useState("");
+
+  // Fetch industry and skill options
+  useEffect(() => {
+    axios.get("http://localhost:8000/api/industries/")
+      .then(res => setIndustryOptions(res.data))
+      .catch(() => setIndustryOptions([]));
+
+    axios.get("http://localhost:8000/api/skills/")
+      .then(res => setSkillOptions(res.data))
+      .catch(() => setSkillOptions([]));
+  }, []);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData({...formData, [e.target.name]: e.target.value});
+  };
+
+  const handleCheckboxChange = (type, id) => {
+    setFormData((prev) => {
+      const selected = prev[type];
+      const updated = selected.includes(id)
+        ? selected.filter(item => item !== id)
+        : [...selected, id];
+      return { ...prev, [type]: updated };
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess(false);
-
     try {
-      const response = await fetch('/api/preferences/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        setSuccess(true);
-        setFormData({
-          student_id: '',
-          student_pref_id: '',
-          pref_location: '',
-          available_from: '',
-          available_to: '',
-        });
-      } else {
-        const errorData = await response.json();
-        setError(errorData.detail || 'Something went wrong.');
-      }
+      await axios.post("http://127.0.0.1:8000/api/student-preference/", formData)
+      setMessage("Preferences submitted successfully!");
     } catch (err) {
-      setError('Server error. Try again later.');
+      setMessage(err.response?.data?.error || "Server error. Try again later.");
     }
   };
 
   return (
-    <div className="max-w-md mx-auto p-4 bg-white shadow-md rounded-xl">
-      <h2 className="text-xl font-bold mb-4">Student Preference Form</h2>
-      {success && <p className="text-green-600">Submitted successfully!</p>}
-      {error && <p className="text-red-600">{error}</p>}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          name="student_id"
-          placeholder="Student ID"
-          value={formData.student_id}
-          onChange={handleChange}
-          className="w-full p-2 border rounded"
-          required
-        />
+    <div style={styles.container}>
+      <h2>Student Preference Form</h2>
+      <form onSubmit={handleSubmit} style={styles.form}>
         <input
           name="student_pref_id"
           placeholder="Preference ID"
           value={formData.student_pref_id}
           onChange={handleChange}
-          className="w-full p-2 border rounded"
           required
+          style={styles.input}
         />
         <input
           name="pref_location"
           placeholder="Preferred Location"
           value={formData.pref_location}
           onChange={handleChange}
-          className="w-full p-2 border rounded"
           required
+          style={styles.input}
         />
-        <label className="block">Available From:</label>
+        <label>Available From:</label>
         <input
-          name="available_from"
           type="date"
+          name="available_from"
           value={formData.available_from}
           onChange={handleChange}
-          className="w-full p-2 border rounded"
           required
+          style={styles.input}
         />
-        <label className="block">Available To:</label>
+        <label>Available To:</label>
         <input
-          name="available_to"
           type="date"
+          name="available_to"
           value={formData.available_to}
           onChange={handleChange}
-          className="w-full p-2 border rounded"
           required
+          style={styles.input}
         />
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
-        >
-          Submit
-        </button>
+
+        <h4>Select Preferred Industries:</h4>
+        {industryOptions.map((industry) => (
+          <label key={industry.industry_id} style={styles.checkboxLabel}>
+            <input
+              type="checkbox"
+              onChange={() => handleCheckboxChange("industries", industry.industry_id)}
+            />
+            {industry.name}
+          </label>
+        ))}
+
+        <h4>Select Desired Skills:</h4>
+        {skillOptions.map((skill) => (
+          <label key={skill.skill_id} style={styles.checkboxLabel}>
+            <input
+              type="checkbox"
+              onChange={() => handleCheckboxChange("skills", skill.skill_id)}
+            />
+            {skill.name}
+          </label>
+        ))}
+
+        <button type="submit" style={styles.button}>Submit</button>
       </form>
+
+      {message && <p style={styles.message}>{message}</p>}
     </div>
   );
+};
+
+const styles = {
+  container: {
+    width: "500px",
+    margin: "30px auto",
+    padding: "20px",
+    border: "1px solid #ccc",
+    borderRadius: "10px",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+  },
+  form: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "15px",
+  },
+  input: {
+    padding: "10px",
+    borderRadius: "5px",
+    fontSize: "16px",
+    border: "1px solid #aaa",
+  },
+  checkboxLabel: {
+    display: "block",
+    marginTop: "5px",
+  },
+  button: {
+    padding: "10px",
+    backgroundColor: "#007bff",
+    color: "white",
+    fontSize: "16px",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+  },
+  message: {
+    marginTop: "10px",
+    color: "#333",
+  },
 };
 
 export default StudentPreferenceForm;

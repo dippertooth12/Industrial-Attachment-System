@@ -20,7 +20,7 @@ const StudentRegister = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://127.0.0.1:8000/api/register-student/", formData);
+      const response = await axios.post("http://127.0.0.1:8000/api/register/student/", formData);
       setMessage(response.data.message);
     } catch (error) {
       setMessage(error.response?.data?.error || "Something went wrong.");

@@ -7,8 +7,8 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth.hashers import check_password
 from .models import Student
-from .serializers import StudentSerializer
-from .models import Student, StudentPreference
+from .serializers import StudentSerializer,IndustrySerializer,SkillSerializer
+from .models import Student, StudentPreference,Skill,DesiredSkill,PreferredIndustry,Industry
 from django.views.decorators.csrf import csrf_exempt
 
 @api_view(['POST'])
@@ -20,7 +20,7 @@ def register_student(request):
         if Student.objects.filter(student_id=data['student_id']).exists():
             return Response({"error": "Student ID already registered"}, status=400)
 
-        if Student.objects.filter(phonenumber=data['phonenumber']).exists():
+        if Student.objects.filter(student_contact_number=data['student_contact_number']).exists():
             return Response({"error": "Phone number already registered"}, status=400)
 
         serializer = StudentSerializer(data=data)
@@ -57,29 +57,52 @@ def preference_list(request):
             "available_to": pref.available_to,
         })
     return JsonResponse(data, safe=False)
-@csrf_exempt
+@api_view(['POST'])
 def create_student_preference(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
+    print("🔥 CREATE PREFERENCE CALLED")
+    try:
+        data = request.data
+        print("📦 Received:", data)
 
-        try:
-            student = Student.objects.get(student_id=data['student_id'])
+        student = Student.objects.get(student_id=data['student_id'])
+        print("👤 Student found:", student)
 
-            pref = StudentPreference.objects.create(
-                student_pref_id=data['student_pref_id'],
-                student=student,
-                pref_location=data['pref_location'],
-                available_from=data['available_from'],
-                available_to=data['available_to']
-            )
-            return JsonResponse({'message': 'Preference created successfully!'}, status=201)
+        pref = StudentPreference.objects.create(
+            student_pref_id=data['student_pref_id'],
+            student=student,
+            pref_location=data['pref_location'],
+            available_from=data['available_from'],
+            available_to=data['available_to']
+        )
+        print("✅ Preference saved.")
 
-        except Student.DoesNotExist:
-            return JsonResponse({'detail': 'Student not found'}, status=400)
-        except Exception as e:
-            return JsonResponse({'detail': str(e)}, status=500)
+        for industry_id in data.get('industries', []):
+            print("🔧 Linking industry:", industry_id)
+            industry = Industry.objects.get(industry_id=industry_id)
+            PreferredIndustry.objects.create(student_pref=pref, industry=industry)
 
-    return JsonResponse({'detail': 'Method not allowed'}, status=405)
+        for skill_id in data.get('skills', []):
+            print("🔧 Linking skill:", skill_id)
+            skill = Skill.objects.get(skill_id=skill_id)
+            DesiredSkill.objects.create(student_pref=pref, skill=skill)
+
+        return JsonResponse({'message': 'Preferences saved successfully'}, status=201)
+
+    except Exception as e:
+        print("❌ SERVER ERROR:", str(e))
+        return JsonResponse({'error': 'Server error: ' + str(e)}, status=500)
+
+@api_view(['GET'])
+def get_industries(request):
+    industries = Industry.objects.all()
+    serializer = IndustrySerializer(industries, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def get_skills(request):
+    skills = Skill.objects.all()
+    serializer = SkillSerializer(skills, many=True)
+    return Response(serializer.data)
 
 
     

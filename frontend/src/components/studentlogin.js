@@ -17,7 +17,7 @@ const StudentLogin = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://127.0.0.1:8000/api/login/", formData, {
+      const response = await axios.post("http://127.0.0.1:8000/api/login/student/", formData, { 
         headers:{
           "Content-Type": "application/json",
         },
