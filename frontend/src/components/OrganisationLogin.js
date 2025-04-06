@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom'; // Import Link from react-router-dom
+import { Link, useNavigate } from 'react-router-dom'; // Import Link and useNavigate from react-router-dom
 
 const OrganisationLogin = () => {
   const [formData, setFormData] = useState({
     contact_email: '',
     password: '',
   });
-
   const [message, setMessage] = useState('');
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -16,19 +16,24 @@ const OrganisationLogin = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const response = await fetch('http://127.0.0.1:8000/api/login-organisation/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData),
-    });
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/login-organisation/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (response.ok) {
-      setMessage('Login successful!');
-      // redirect logic if needed
-    } else {
-      setMessage(data.error || 'Login failed');
+      if (response.ok) {
+        setMessage('Login successful!');
+        localStorage.setItem("organisation_id", data.organisation_id); // Store login state if needed
+        navigate("/dashboard"); // Redirect to dashboard on successful login
+      } else {
+        setMessage(data.error || 'Login failed');
+      }
+    } catch (error) {
+      setMessage('An error occurred. Please try again.');
     }
   };
 
