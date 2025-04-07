@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from django.contrib.auth.hashers import check_password
 from .models import Student
 from .serializers import StudentSerializer,IndustrySerializer,SkillSerializer
-from .models import Student, StudentPreference,Skill,DesiredSkill,PreferredIndustry,Industry
+from .models import Student, StudentPreference,Skill,DesiredSkill,PreferredIndustry,Industry,generate_preference_id
 from django.views.decorators.csrf import csrf_exempt
 
 @api_view(['POST'])
@@ -59,39 +59,33 @@ def preference_list(request):
     return JsonResponse(data, safe=False)
 @api_view(['POST'])
 def create_student_preference(request):
-    print("🔥 CREATE PREFERENCE CALLED")
     try:
         data = request.data
-        print("📦 Received:", data)
-
         student = Student.objects.get(student_id=data['student_id'])
-        print("👤 Student found:", student)
+
+        # Generate ID
+        new_id = generate_preference_id(student.student_id)
 
         pref = StudentPreference.objects.create(
-            student_pref_id=data['student_pref_id'],
+            student_pref_id=new_id,
             student=student,
             pref_location=data['pref_location'],
             available_from=data['available_from'],
             available_to=data['available_to']
         )
-        print("✅ Preference saved.")
 
         for industry_id in data.get('industries', []):
-            print("🔧 Linking industry:", industry_id)
             industry = Industry.objects.get(industry_id=industry_id)
             PreferredIndustry.objects.create(student_pref=pref, industry=industry)
 
         for skill_id in data.get('skills', []):
-            print("🔧 Linking skill:", skill_id)
             skill = Skill.objects.get(skill_id=skill_id)
             DesiredSkill.objects.create(student_pref=pref, skill=skill)
 
-        return JsonResponse({'message': 'Preferences saved successfully'}, status=201)
+        return JsonResponse({'message': 'Preferences saved successfully', 'id': pref.student_pref_id}, status=201)
 
     except Exception as e:
-        print("❌ SERVER ERROR:", str(e))
         return JsonResponse({'error': 'Server error: ' + str(e)}, status=500)
-
 @api_view(['GET'])
 def get_industries(request):
     industries = Industry.objects.all()

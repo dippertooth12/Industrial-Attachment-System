@@ -3,7 +3,6 @@ import axios from "axios";
 
 const StudentPreferenceForm = () => {
   const [formData, setFormData] = useState({
-    student_pref_id: "",
     student_id: localStorage.getItem("student_id") || "",
     pref_location: "",
     available_from: "",
@@ -12,6 +11,7 @@ const StudentPreferenceForm = () => {
     skills: [],
   });
 
+  const [generatedId, setGeneratedId] = useState(null);
   const [industryOptions, setIndustryOptions] = useState([]);
   const [skillOptions, setSkillOptions] = useState([]);
   const [message, setMessage] = useState("");
@@ -44,7 +44,8 @@ const StudentPreferenceForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://127.0.0.1:8000/api/student-preference/", formData)
+      const response = await axios.post("http://127.0.0.1:8000/api/student-preference/", formData);
+      setGeneratedId(response.data.id); // get generated preference ID from backend
       setMessage("Preferences submitted successfully!");
     } catch (err) {
       setMessage(err.response?.data?.error || "Server error. Try again later.");
@@ -54,15 +55,8 @@ const StudentPreferenceForm = () => {
   return (
     <div style={styles.container}>
       <h2>Student Preference Form</h2>
+      {generatedId && <p style={styles.message}>Your preference number is <strong>{generatedId}</strong></p>}
       <form onSubmit={handleSubmit} style={styles.form}>
-        <input
-          name="student_pref_id"
-          placeholder="Preference ID"
-          value={formData.student_pref_id}
-          onChange={handleChange}
-          required
-          style={styles.input}
-        />
         <input
           name="pref_location"
           placeholder="Preferred Location"
