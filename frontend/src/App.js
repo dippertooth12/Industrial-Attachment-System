@@ -1,34 +1,44 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useParams } from "react-router-dom";
 
-// Student components
+// Student Components
 import StudentRegister from "./components/StudentRegister";
 import StudentLogin from "./components/studentlogin";
 
-// Organisation components
+// Organisation Components
 import OrganisationRegister from "./components/OrganisationRegister";
 import OrganisationLogin from "./components/OrganisationLogin";
+import OrganisationDashboard from "./components/OrganisationDashboard";
+import OrganisationPreferenceForm from "./components/OrganisationPreferenceForm";
 
-// Shared components
+// Shared Components
 import Dashboard from "./components/Dashboard";
 import Homepage from "./components/Homepage";
+
+// Wrapper for dynamic orgId route
+const OrganisationPreferenceFormWrapper = () => {
+  const { orgId } = useParams();
+  return <OrganisationPreferenceForm orgId={orgId} />;
+};
 
 function App() {
   return (
     <Router>
       <Routes>
-        {/* Home */}
+        {/* Homepage */}
         <Route path="/" element={<Homepage />} />
 
-        {/* Student */}
+        {/* Student Routes */}
         <Route path="/login" element={<StudentLogin />} />
         <Route path="/register" element={<StudentRegister />} />
 
-        {/* Organisation */}
-        <Route path="/login_organisation" element={<OrganisationLogin />} />
+        {/* Organisation Routes */}
+        <Route path="/login-organisation" element={<OrganisationLogin />} />
         <Route path="/register-organisation" element={<OrganisationRegister />} />
+        <Route path="/organisation-dashboard" element={<OrganisationDashboard />} />
+        <Route path="/organisation/:orgId/preferences/create" element={<OrganisationPreferenceFormWrapper />} />
 
-        {/* Common */}
+        {/* Shared Dashboard */}
         <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </Router>
@@ -36,6 +46,3 @@ function App() {
 }
 
 export default App;
-
-
-

@@ -34,3 +34,25 @@ class Location(models.Model):
     class Meta:
         unique_together = ('street', 'plot_no')
 
+
+class OrganisationPreference(models.Model):
+    pref_id = models.AutoField(primary_key=True)
+    organisation = models.ForeignKey(Organisation, on_delete=models.CASCADE, related_name='preferences')
+    pref_education_level = models.CharField(max_length=100)
+    positions_available = models.IntegerField()
+    start_date = models.DateField()
+    end_date = models.DateField()
+
+
+
+class PreferredField(models.Model):
+    field_id = models.AutoField(primary_key=True)
+    preference = models.ForeignKey(OrganisationPreference, on_delete=models.CASCADE, related_name='preferred_fields')
+    field_name = models.CharField(max_length=100)
+
+
+class RequiredSkill(models.Model):
+    skill_id = models.AutoField(primary_key=True)
+    preference = models.ForeignKey(OrganisationPreference, on_delete=models.CASCADE, related_name='required_skills')
+    skill_name = models.CharField(max_length=100)
+

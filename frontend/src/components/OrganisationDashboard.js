@@ -6,28 +6,41 @@ const OrganisationDashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch organization data from localStorage or API
     const orgEmail = localStorage.getItem("contact_email");
 
     if (!orgEmail) {
-      navigate("/login-organisation");  // Redirect to login if no email found
+      navigate("/login-organisation");
     } else {
-      // Fetch organization details from API (if required)
-      // For this example, we will mock it as an object
-      setOrganization({
-        name: "Sample Organisation",
-        email: orgEmail,
-        town: "Sample Town",
-        industry: "Healthcare",
-        contact_number: "123-456-789",
-      });
+      fetch(`http://127.0.0.1:8000/api/organisation/by-email/${orgEmail}`)
+        .then(res => res.json())
+        .then(data => {
+          console.log(data);
+          if (data.error) {
+            navigate("/login-organisation");
+          } else {
+            setOrganization(data);
+
+            // Also store org ID in localStorage for later use
+            localStorage.setItem("organisation_id", data.id);
+          }
+        })
+        .catch(() => navigate("/login-organisation"));
     }
   }, [navigate]);
 
   const handleLogout = () => {
-    // Clear the localStorage or any stored session data
     localStorage.removeItem("contact_email");
-    navigate("/login-organisation");  // Redirect to login page after logout
+    localStorage.removeItem("organisation_id");
+    navigate("/login-organisation");
+  };
+
+  const handleManagePreferences = () => {
+    const orgId = localStorage.getItem("organisation_id");
+    if (orgId) {
+      navigate(`/organisation/${orgId}/preferences/create`);
+    } else {
+      navigate("/login-organisation");
+    }
   };
 
   return (
@@ -40,9 +53,15 @@ const OrganisationDashboard = () => {
           <p><strong>Industry:</strong> {organization.industry}</p>
           <p><strong>Town:</strong> {organization.town}</p>
           <p><strong>Contact Number:</strong> {organization.contact_number}</p>
-          
-          {/* Add more organization-specific content here */}
+
           <button onClick={handleLogout} style={styles.button}>Logout</button>
+
+          <button
+            onClick={handleManagePreferences}
+            style={{ ...styles.button, backgroundColor: "#28a745", marginTop: "10px" }}
+          >
+            Manage Preferences
+          </button>
         </div>
       ) : (
         <p>Loading...</p>

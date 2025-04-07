@@ -14,8 +14,8 @@ const OrganisationRegister = () => {
   });
 
   const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
-  // Static list of industries
   const industries = ["Software", "Healthcare", "Finance", "Education"];
 
   const handleChange = (e) => {
@@ -24,8 +24,16 @@ const OrganisationRegister = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setMessage("");
+    setError("");
+
     try {
       const response = await axios.post("http://127.0.0.1:8000/api/register-organisation/", formData);
+      
+      // Store organisation_id
+      localStorage.setItem("organisation_id", response.data.organisation.id);
+      localStorage.setItem("contact_email", response.data.organisation.contact_email);
+
       setMessage("Organisation registered successfully!");
       setFormData({
         org_name: '',
@@ -37,8 +45,8 @@ const OrganisationRegister = () => {
         contact_email: '',
         password: '',
       });
-    } catch (error) {
-      setMessage(error.response?.data?.error || "Registration failed.");
+    } catch (err) {
+      setError(err.response?.data?.error || "Registration failed.");
     }
   };
 
@@ -46,25 +54,23 @@ const OrganisationRegister = () => {
     <div style={styles.container}>
       <h2>Organisation Registration</h2>
       <form onSubmit={handleSubmit} style={styles.form}>
-        <input name="org_name" placeholder="Organisation Name" onChange={handleChange} value={formData.org_name} required style={styles.input} />
-        
-        {/* Industry Dropdown */}
-        <select name="industry_name" onChange={handleChange} value={formData.industry_name} required style={styles.input}>
+        <input name="org_name" placeholder="Organisation Name" value={formData.org_name} onChange={handleChange} required style={styles.input} />
+        <select name="industry_name" value={formData.industry_name} onChange={handleChange} required style={styles.input}>
           <option value="">Select Industry</option>
           {industries.map((industry, index) => (
             <option key={index} value={industry}>{industry}</option>
           ))}
         </select>
-
-        <input name="town" placeholder="Town" onChange={handleChange} value={formData.town} required style={styles.input} />
-        <input name="street" placeholder="Street" onChange={handleChange} value={formData.street} required style={styles.input} />
-        <input name="plot_number" placeholder="Plot Number" onChange={handleChange} value={formData.plot_number} required style={styles.input} />
-        <input name="contact_number" placeholder="Contact Number" onChange={handleChange} value={formData.contact_number} required style={styles.input} />
-        <input name="contact_email" placeholder="Contact Email" type="email" onChange={handleChange} value={formData.contact_email} required style={styles.input} />
-        <input name="password" placeholder="Password" type="password" onChange={handleChange} value={formData.password} required style={styles.input} />
+        <input name="town" placeholder="Town" value={formData.town} onChange={handleChange} required style={styles.input} />
+        <input name="street" placeholder="Street" value={formData.street} onChange={handleChange} required style={styles.input} />
+        <input name="plot_number" placeholder="Plot Number" value={formData.plot_number} onChange={handleChange} required style={styles.input} />
+        <input name="contact_number" placeholder="Contact Number" value={formData.contact_number} onChange={handleChange} required style={styles.input} />
+        <input name="contact_email" type="email" placeholder="Contact Email" value={formData.contact_email} onChange={handleChange} required style={styles.input} />
+        <input name="password" type="password" placeholder="Password" value={formData.password} onChange={handleChange} required style={styles.input} />
         <button type="submit" style={styles.button}>Register</button>
+        {message && <p style={{ ...styles.message, color: 'green' }}>{message}</p>}
+        {error && <p style={{ ...styles.message, color: 'red' }}>{error}</p>}
       </form>
-      {message && <p style={styles.message}>{message}</p>}
     </div>
   );
 };
@@ -101,7 +107,6 @@ const styles = {
   },
   message: {
     marginTop: '15px',
-    color: '#333',
   },
 };
 

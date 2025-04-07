@@ -1,19 +1,20 @@
 import React from 'react';
-import {useNavigate} from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const Homepage = () => {
-    const navigate = useNavigate(); //useNavigate for routing
+  const navigate = useNavigate(); // useNavigate for routing
 
-    //navigate to student login page when button is clicked
-    const handleStudentLoginClick = () => {
-        navigate('/login');
-    };
+  // Navigate to student login page
+  const handleStudentLoginClick = () => {
+    navigate('/login');
+  };
 
-    const handleOrgLoginClick = () => {
-      navigate('/login_organisation');
-    }
+  // ✅ Navigate to the correct Organisation Login route
+  const handleOrgLoginClick = () => {
+    navigate('/login-organisation'); // fixed: changed from _ to -
+  };
 
-    // Inline styles
+  // Inline styles
   const styles = {
     container: {
       display: 'flex',
@@ -62,10 +63,10 @@ const Homepage = () => {
         >
           Student Login
         </button>
-        <button 
+        <button
           style={{ ...styles.button, ...styles.buttonPink }}
-          onClick ={handleOrgLoginClick}
-          >
+          onClick={handleOrgLoginClick}
+        >
           Organization Login
         </button>
         <button style={{ ...styles.button, ...styles.buttonPink }}>
