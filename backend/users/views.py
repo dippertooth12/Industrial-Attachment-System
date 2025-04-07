@@ -4,7 +4,9 @@ from rest_framework import status  # Import status for better readability
 from .models import Student
 from .serializers import StudentSerializer
 from django.contrib.auth.hashers import check_password
-
+from .models import Logbook
+from .serializers import LogbookSerializer
+from rest_framework import generics
 
 @api_view(['POST'])
 def register_student(request):
@@ -56,3 +58,16 @@ def login_student(request):
 
     except Student.DoesNotExist:
         return Response({"error": "Student not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+class LogbookCreateView(generics.CreateAPIView):
+    queryset = Logbook.objects.all()
+    serializer_class = LogbookSerializer
+
+@api_view(['POST'])
+def create_logbook_entry(request):
+    serializer = LogbookSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -5,6 +5,9 @@ import {BrowserRouter as Router, Routes,Route } from "react-router-dom";
 import StudentLogin from "./components/studentlogin";
 import Dashboard from "./components/Dashboard";
 import Homepage from './components/Homepage';
+import LogbookForm from './components/LogbookForm';
+
+
 
 function App() {
   return (
@@ -14,7 +17,7 @@ function App() {
           <Route path="/login" element={<StudentLogin/>} />
           <Route path="/register" element={<StudentRegister/>} />
           <Route path="/dashboard" element={<Dashboard/>}/>
-          {/* You can add more routes here*/}
+          <Route path="/logbook" element={<LogbookForm />} />
         </Routes>
     </Router>
   );
