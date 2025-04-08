@@ -9,8 +9,8 @@ from rest_framework import status
 from django.contrib.auth.hashers import check_password
 from .models import Student
 import traceback
-from .serializers import StudentSerializer,IndustrySerializer,SkillSerializer,OrganisationSerializer,OrganisationPreferenceSerializer,RequiredSkillSerializer,PreferredFieldSerializer
-from .models import Student, StudentPreference,Skill,DesiredSkill,PreferredIndustry,Industry,generate_preference_id,Organisation,Location,OrganisationPreference
+from .serializers import StudentSerializer,IndustrySerializer,SkillSerializer,OrganisationSerializer,OrganisationPreferenceSerializer,RequiredSkillSerializer,PreferredFieldSerializer,LogbookSerializer
+from .models import Student, StudentPreference,Skill,DesiredSkill,PreferredIndustry,Industry,generate_preference_id,Organisation,Location,OrganisationPreference,Logbook
 from django.views.decorators.csrf import csrf_exempt
 
 @api_view(['POST'])
@@ -243,7 +243,44 @@ def add_required_skill(request):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+@api_view(['GET', 'POST'])
+def create_logbook_entry(request):
+    if request.method == 'POST':
+        try:
+            data = request.data
+            required_fields = ['student_id', 'org_id', 'week_number', 'log_entry']
+            for field in required_fields:
+                if field not in data:
+                    return Response({"error": f"{field} is a required field."}, status=status.HTTP_400_BAD_REQUEST)
 
+            if not Student.objects.filter(student_id=data['student_id']).exists():
+                return Response({"error": "Student ID does not exist."}, status=status.HTTP_400_BAD_REQUEST)
 
+            if not Organisation.objects.filter(org_id=data['org_id']).exists():
+                return Response({"error": "Organisation ID does not exist."}, status=status.HTTP_400_BAD_REQUEST)
+
+            serializer = LogbookSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    elif request.method == 'GET':
+        logs = Logbook.objects.all()
+        serializer = LogbookSerializer(logs, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def get_org_id_by_name(request):
+    name = request.GET.get("name")
+    try:
+        org = Organisation.objects.get(org_name=name)
+        return Response({"org_id": org.org_id})
+    except Organisation.DoesNotExist:
+        return Response({"error": "Organisation not found."}, status=status.HTTP_404_NOT_FOUND)
     
 

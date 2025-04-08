@@ -1,6 +1,6 @@
 from  rest_framework import serializers
 from django.contrib.auth.hashers import make_password
-from .models import Student,Industry,Skill,Organisation,OrganisationPreference,PreferredField,RequiredSkill,PreferredIndustry,StudentPreference,DesiredSkill
+from .models import Student,Industry,Skill,Organisation,OrganisationPreference,PreferredField,RequiredSkill,PreferredIndustry,StudentPreference,DesiredSkill,Logbook
 
 class StudentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -148,4 +148,10 @@ class RequiredSkillSerializer(serializers.ModelSerializer):
     class Meta:
         model = RequiredSkill
         fields = '__all__'
+
+class LogbookSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Logbook
+        fields = ['student_id', 'org_id', 'week_number', 'log_entry', 'submitted_at']
+        # Note: logbook_id is not included as it's automatically generated
    

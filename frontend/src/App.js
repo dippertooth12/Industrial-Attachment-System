@@ -16,8 +16,10 @@ import PreferenceForm from "./Preferenceform"
 // Shared Components
 import Dashboard from "./components/Dashboard";
 import Homepage from "./components/Homepage";
+import LogbookForm from './components/LogbookForm';
 
 function App() {
+  console.log("Logbook route loaded");
   return (
     <Router>
         <Routes>
@@ -34,6 +36,7 @@ function App() {
           <Route path="/submit-preference" element={<PreferenceForm />} />
           <Route path="/organisation-dashboard" element={<OrganisationDashboard />} />
           <Route path="/organisation/:orgId/preferences/create" element={<OrganisationPreferenceForm />}/>
+          <Route path="/logbook" element={<LogbookForm />} />
           {/* You can add more routes here*/}
         </Routes>
     </Router>

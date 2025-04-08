@@ -14,6 +14,9 @@ const Dashboard = () => {
     const goToPreferenceForm = () => {
         navigate("/submit-preference");
       };
+      const goToLogbook = () => {
+        navigate("/logbook");  // 🔁 Make sure this route exists in App.js
+      };
 
     return (
         <div className="dashboard-container">
@@ -23,6 +26,9 @@ const Dashboard = () => {
             <button onClick={goToPreferenceForm} style={styles.button}>
             Submit Preferences
             </button>
+            <button onClick={goToLogbook} style={styles.button}>
+              Go to Logbook
+          </button>
         </div>
     );
 };

@@ -10,7 +10,9 @@ from .views import (
     add_preferred_field,
     add_required_skill,
     list_organisation_preferences,
-    create_organisation_preference
+    create_organisation_preference,
+    create_logbook_entry,
+    get_org_id_by_name,
 )
 from django.views.generic import TemplateView
 
@@ -34,6 +36,7 @@ urlpatterns = [
 
     # Optional frontend entry point
     path('dashboard/', TemplateView.as_view(template_name="index.html"), name='dashboard'),
-    
+    path('logbook/', create_logbook_entry, name='logbook'),
+    path('get-org-id-by-name/', get_org_id_by_name, name='get_org_id_by_name'),
 ]
     
