@@ -21,10 +21,9 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('users.urls')),
+    path('api/logbook/', include('users.urls')),  # Correct it to users.urls
 ]
 
 
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('users.urls')),  # <-- replace 'logbook' with your app name
-]
+
+

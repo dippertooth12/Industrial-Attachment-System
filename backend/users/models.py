@@ -1,4 +1,8 @@
 from django.db import models
+import random
+import string
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 
 
 class Student(models.Model):
@@ -34,14 +38,26 @@ class Location(models.Model):
     class Meta:
         unique_together = ('street', 'plot_no')
 
+    
+def generate_random_logbook_id():
+    # Generate a random string of 8 characters (can be changed to your preferred length)
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+
 class Logbook(models.Model):
-    logbook_id = models.AutoField(primary_key=True)
-    student_id = models.ForeignKey('Student', on_delete=models.CASCADE)
-    org_id = models.ForeignKey('Organisation', on_delete=models.CASCADE)
+    logbook_id = models.CharField(max_length=8, primary_key=True, default=generate_random_logbook_id, editable=False)
+    student_id = models.ForeignKey('Student', to_field='student_id', on_delete=models.CASCADE)
+    org_id = models.ForeignKey('Organisation', to_field='org_id', on_delete=models.CASCADE)  # Adjusted if needed
     week_number = models.IntegerField()
     log_entry = models.TextField()
     submitted_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Logbook entry for {self.student_id} Week {self.week_number}"
+
+
+# Using the pre_save signal to assign the random logbook_id before saving
+@receiver(pre_save, sender=Logbook)
+def set_logbook_id(sender, instance, **kwargs):
+    if not instance.logbook_id:  # If logbook_id is not provided, generate a new one
+        instance.logbook_id = generate_random_logbook_id()
 

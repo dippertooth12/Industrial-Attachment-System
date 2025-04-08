@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom'; // Import Link and useNavigate from react-router-dom
 
-const LogbookForm = () => {
+const OrganisationLogin = () => {
   const [formData, setFormData] = useState({
-    student_id: '',
-    org_id: '',
-    week_number: '',
-    log_entry: '',
+    contact_email: '',
+    password: '',
   });
   const [message, setMessage] = useState('');
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -17,7 +17,7 @@ const LogbookForm = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch('http://localhost:8000/api/logbook/', {
+      const response = await fetch('http://localhost:8000/api/login-organisation/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -26,10 +26,11 @@ const LogbookForm = () => {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage('Logbook entry submitted successfully!');
-        setFormData({ student_id: '', org_id: '', week_number: '', log_entry: '' });
+        setMessage('Login successful!');
+        localStorage.setItem("organisation_id", data.organisation_id); // Store login state if needed
+        navigate("/dashboard"); // Redirect to dashboard on successful login
       } else {
-        setMessage(data.error || 'Submission failed');
+        setMessage(data.error || 'Login failed');
       }
     } catch (error) {
       setMessage('An error occurred. Please try again.');
@@ -38,53 +39,41 @@ const LogbookForm = () => {
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.title}>Logbook Entry</h2>
+      <h2 style={styles.title}>Organisation Login</h2>
       <form onSubmit={handleSubmit} style={styles.form}>
         <input
-          type="text"
-          name="student_id"
-          value={formData.student_id}
+          type="email"
+          name="contact_email"
+          value={formData.contact_email}
           onChange={handleChange}
-          placeholder="Student ID"
+          placeholder="Contact Email"
           style={styles.input}
           required
         />
         <input
-          type="text"
-          name="org_id"
-          value={formData.org_id}
+          type="password"
+          name="password"
+          value={formData.password}
           onChange={handleChange}
-          placeholder="Organisation ID"
+          placeholder="Password"
           style={styles.input}
           required
         />
-        <input
-          type="number"
-          name="week_number"
-          value={formData.week_number}
-          onChange={handleChange}
-          placeholder="Week Number"
-          style={styles.input}
-          required
-        />
-        <textarea
-          name="log_entry"
-          value={formData.log_entry}
-          onChange={handleChange}
-          placeholder="Log Entry"
-          style={styles.textarea}
-          required
-        />
-        <button type="submit" style={styles.button}>Submit</button>
+        <button type="submit" style={styles.button}>Login</button>
         {message && <p style={styles.message}>{message}</p>}
       </form>
+      <div style={styles.registerLinkContainer}>
+        <p style={styles.registerLinkText}>
+          Don't have an account? <Link to="/register-organisation" style={styles.registerLink}>Register here</Link>
+        </p>
+      </div>
     </div>
   );
 };
 
 const styles = {
   container: {
-    maxWidth: '500px',
+    maxWidth: '400px',
     margin: '2rem auto',
     padding: '2rem',
     borderRadius: '12px',
@@ -107,18 +96,11 @@ const styles = {
     borderRadius: '6px',
     border: '1px solid #ccc',
   },
-  textarea: {
-    padding: '0.5rem',
-    fontSize: '1rem',
-    borderRadius: '6px',
-    border: '1px solid #ccc',
-    minHeight: '100px',
-  },
   button: {
     padding: '0.6rem',
     fontSize: '1rem',
     borderRadius: '6px',
-    backgroundColor: '#28a745',
+    backgroundColor: '#007BFF',
     color: 'white',
     border: 'none',
     cursor: 'pointer',
@@ -128,7 +110,18 @@ const styles = {
     marginTop: '1rem',
     color: '#d9534f',
   },
+  registerLinkContainer: {
+    textAlign: 'center',
+    marginTop: '1rem',
+  },
+  registerLinkText: {
+    fontSize: '1rem',
+  },
+  registerLink: {
+    color: '#007BFF',
+    textDecoration: 'none',
+    fontWeight: 'bold',
+  },
 };
 
-export default LogbookForm;
-
+export default OrganisationLogin;

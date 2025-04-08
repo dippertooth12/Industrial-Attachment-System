@@ -9,6 +9,10 @@ const Homepage = () => {
         navigate('/login');
     };
 
+    const handleOrgLoginClick = () => {
+      navigate('/login_organisation');
+    }
+
     // Inline styles
   const styles = {
     container: {
@@ -58,7 +62,10 @@ const Homepage = () => {
         >
           Student Login
         </button>
-        <button style={{ ...styles.button, ...styles.buttonPink }}>
+        <button 
+          style={{ ...styles.button, ...styles.buttonPink }}
+          onClick ={handleOrgLoginClick}
+          >
           Organization Login
         </button>
         <button style={{ ...styles.button, ...styles.buttonPink }}>
