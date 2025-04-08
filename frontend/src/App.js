@@ -1,21 +1,38 @@
 // src/App.js
 import React from "react";
+import { BrowserRouter as Router, Routes, Route, useParams } from "react-router-dom";
+
+// Student Components
 import StudentRegister from "./components/StudentRegister";
-import {BrowserRouter as Router, Routes,Route } from "react-router-dom";
 import StudentLogin from "./components/studentlogin";
+
+// Organisation Components
+import OrganisationRegister from "./components/OrganisationRegister";
+import OrganisationLogin from "./components/OrganisationLogin";
+import OrganisationDashboard from "./components/OrganisationDashboard";
+import OrganisationPreferenceForm from "./components/OrganisationPreferenceForm";
+
+// Shared Components
 import Dashboard from "./components/Dashboard";
-import Homepage from './components/Homepage';
-import StudentPreferenceForm from './Preferenceform'
+import Homepage from "./components/Homepage";
 
 function App() {
   return (
     <Router>
         <Routes>
           <Route path="/" element={<Homepage/>}/>
-          <Route path="/login" element={<StudentLogin/>} />
-          <Route path="/register" element={<StudentRegister/>} />
+          {/* Student */}
+        <Route path="/login" element={<StudentLogin />} />
+        <Route path="/register" element={<StudentRegister />} />
+
+        {/* Organisation */}
+        <Route path="/login_organisation" element={<OrganisationLogin />} />
+        <Route path="/register-organisation" element={<OrganisationRegister />} />
+
           <Route path="/dashboard" element={<Dashboard/>}/>
           <Route path="/submit-preference" element={<StudentPreferenceForm />} />
+          <Route path="/organisation-dashboard" element={<OrganisationDashboard />} />
+          <Route path="/organisation/:orgId/preferences/create" element={<OrganisationPreferenceForm />}/>
           {/* You can add more routes here*/}
         </Routes>
     </Router>
