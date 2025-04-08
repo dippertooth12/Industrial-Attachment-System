@@ -6,28 +6,29 @@ const OrganisationDashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch organization data from localStorage or API
     const orgEmail = localStorage.getItem("contact_email");
+    const orgName = localStorage.getItem("org_name"); // You can store this during login if needed
 
     if (!orgEmail) {
-      navigate("/login-organisation");  // Redirect to login if no email found
+      navigate("/login-organisation");
     } else {
-      // Fetch organization details from API (if required)
-      // For this example, we will mock it as an object
       setOrganization({
-        name: "Sample Organisation",
+        name: orgName || "Your Organisation",
         email: orgEmail,
-        town: "Sample Town",
-        industry: "Healthcare",
-        contact_number: "123-456-789",
       });
     }
   }, [navigate]);
 
   const handleLogout = () => {
-    // Clear the localStorage or any stored session data
     localStorage.removeItem("contact_email");
-    navigate("/login-organisation");  // Redirect to login page after logout
+    localStorage.removeItem("organisation_id");
+    localStorage.removeItem("org_name");
+    navigate("/login-organisation");
+  };
+
+  const handleSubmitPreference = () => {
+    const orgId = localStorage.getItem("organisation_id");
+    navigate(`/organisation/${orgId}/preferences/create`);
   };
 
   return (
@@ -36,13 +37,16 @@ const OrganisationDashboard = () => {
       {organization ? (
         <div>
           <h3>Welcome, {organization.name}</h3>
-          <p><strong>Email:</strong> {organization.email}</p>
-          <p><strong>Industry:</strong> {organization.industry}</p>
-          <p><strong>Town:</strong> {organization.town}</p>
-          <p><strong>Contact Number:</strong> {organization.contact_number}</p>
-          
-          {/* Add more organization-specific content here */}
-          <button onClick={handleLogout} style={styles.button}>Logout</button>
+
+          <div style={styles.buttonRow}>
+  <button onClick={handleLogout} style={{ ...styles.button, backgroundColor: "#dc3545" }}>
+    Logout
+  </button>
+
+  <button onClick={handleSubmitPreference} style={styles.button}>
+    Submit Preference
+  </button>
+</div>
         </div>
       ) : (
         <p>Loading...</p>
@@ -62,7 +66,7 @@ const styles = {
     boxShadow: "0 0 10px rgba(0,0,0,0.1)",
   },
   button: {
-    padding: "10px",
+    padding: "10px 20px",
     fontSize: "16px",
     backgroundColor: "#007bff",
     color: "white",

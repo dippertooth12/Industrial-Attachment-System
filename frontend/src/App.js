@@ -11,6 +11,7 @@ import OrganisationRegister from "./components/OrganisationRegister";
 import OrganisationLogin from "./components/OrganisationLogin";
 import OrganisationDashboard from "./components/OrganisationDashboard";
 import OrganisationPreferenceForm from "./components/OrganisationPreferenceForm";
+import PreferenceForm from "./Preferenceform"
 
 // Shared Components
 import Dashboard from "./components/Dashboard";
@@ -26,11 +27,11 @@ function App() {
         <Route path="/register" element={<StudentRegister />} />
 
         {/* Organisation */}
-        <Route path="/login_organisation" element={<OrganisationLogin />} />
+        <Route path="/login-organisation" element={<OrganisationLogin />} />
         <Route path="/register-organisation" element={<OrganisationRegister />} />
 
           <Route path="/dashboard" element={<Dashboard/>}/>
-          <Route path="/submit-preference" element={<StudentPreferenceForm />} />
+          <Route path="/submit-preference" element={<PreferenceForm />} />
           <Route path="/organisation-dashboard" element={<OrganisationDashboard />} />
           <Route path="/organisation/:orgId/preferences/create" element={<OrganisationPreferenceForm />}/>
           {/* You can add more routes here*/}

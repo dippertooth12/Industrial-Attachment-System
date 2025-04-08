@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth.hashers import check_password
 from .models import Student
+import traceback
 from .serializers import StudentSerializer,IndustrySerializer,SkillSerializer,OrganisationSerializer,OrganisationPreferenceSerializer,RequiredSkillSerializer,PreferredFieldSerializer
 from .models import Student, StudentPreference,Skill,DesiredSkill,PreferredIndustry,Industry,generate_preference_id,Organisation,Location,OrganisationPreference
 from django.views.decorators.csrf import csrf_exempt
@@ -59,13 +60,14 @@ def preference_list(request):
             "available_to": pref.available_to,
         })
     return JsonResponse(data, safe=False)
+
 @api_view(['POST'])
 def create_student_preference(request):
     try:
         data = request.data
-        student = Student.objects.get(student_id=data['student_id'])
+        print("📦 Received data:", data)
 
-        # Generate ID
+        student = Student.objects.get(student_id=data['student_id'])
         new_id = generate_preference_id(student.student_id)
 
         pref = StudentPreference.objects.create(
@@ -77,22 +79,24 @@ def create_student_preference(request):
         )
 
         for industry_id in data.get('industries', []):
+            print(f"🔍 Looking for industry: {industry_id}")
             industry = Industry.objects.get(industry_id=industry_id)
-            PreferredIndustry.objects.create(student_pref=pref, industry=industry)
+            PreferredIndustry.objects.create(student=pref, industry=industry)
 
         for skill_id in data.get('skills', []):
+            print(f"🔍 Looking for skill: {skill_id}")
             skill = Skill.objects.get(skill_id=skill_id)
             DesiredSkill.objects.create(student_pref=pref, skill=skill)
 
         return JsonResponse({'message': 'Preferences saved successfully', 'id': pref.student_pref_id}, status=201)
 
     except Exception as e:
+        traceback.print_exc()  # 🔍 Print full error in terminal
         return JsonResponse({'error': 'Server error: ' + str(e)}, status=500)
-@api_view(['GET'])
+    
 def get_industries(request):
-    industries = Industry.objects.all()
-    serializer = IndustrySerializer(industries, many=True)
-    return Response(serializer.data)
+    data = list(Industry.objects.values("industry_id", "industry_name"))
+    return JsonResponse(data, safe=False)
 
 @api_view(['GET'])
 def get_skills(request):
@@ -104,36 +108,36 @@ def get_skills(request):
 def register_organisation(request):
     try:
         data = request.data
-        required_fields = ['org_name', 'industry_name', 'town', 'street', 'plot_number', 'contact_number', 'contact_email', 'password']
-        
+        required_fields = ['org_name', 'industry', 'town', 'street', 'plot_number', 'contact_number', 'contact_email', 'password']
+
         for field in required_fields:
-            if field not in data:
+            if field not in data or data[field] == '':
                 return Response({"error": f"{field} is a required field"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Check if Organisation email exists
+        # Check for duplicates
         if Organisation.objects.filter(contact_email=data['contact_email']).exists():
             return Response({"error": "Email already registered"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Check if Organisation name exists
         if Organisation.objects.filter(org_name=data['org_name']).exists():
             return Response({"error": "Organisation already registered"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Check if Organisation contact number exists
         if Organisation.objects.filter(contact_number=data['contact_number']).exists():
             return Response({"error": "Organisation contact already registered"}, status=status.HTTP_400_BAD_REQUEST)
 
-        location = Location.objects.create(
+        # Validate the industry_id
+        try:
+            industry = Industry.objects.get(industry_id=data['industry'])
+        except Industry.DoesNotExist:
+            return Response({"error": "Invalid industry selected"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Create location
+        Location.objects.create(
             town=data['town'],
             street=data['street'],
             plot_no=data['plot_number']
         )
 
-
-        # Check/Create the industry
-        industry_name = data.get('industry_name')
-        industry, _ = Industry.objects.get_or_create(industry_name=industry_name)
-
-        # Prepare organization data
+        # Prepare and save organisation
         org_data = {
             'org_name': data['org_name'],
             'industry': industry.pk,
@@ -142,10 +146,9 @@ def register_organisation(request):
             'plot_number': data['plot_number'],
             'contact_number': data['contact_number'],
             'contact_email': data['contact_email'],
-            'password': data['password'],  # The password will be hashed automatically in the serializer
+            'password': data['password'],  # will be hashed in serializer
         }
 
-        # Validate and save the organization data
         serializer = OrganisationSerializer(data=org_data)
         if serializer.is_valid():
             serializer.save()
@@ -165,11 +168,13 @@ def login_organisation(request):
     try:
         organisation = Organisation.objects.get(contact_email=contact_email)
 
-        # Use check_password to compare the entered password with the stored hash
         if check_password(password, organisation.password):
-            return Response({"message": "Organisation login successful"}, status=status.HTTP_200_OK)
-        else:
-            return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                "message": "Organisation login successful",
+                "organisation_id": organisation.org_id  # ✅ This line is needed!
+            }, status=status.HTTP_200_OK)
+
+        return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
 
     except Organisation.DoesNotExist:
         return Response({"error": "Organisation not found"}, status=status.HTTP_404_NOT_FOUND)

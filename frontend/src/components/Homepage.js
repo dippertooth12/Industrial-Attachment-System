@@ -8,6 +8,9 @@ const Homepage = () => {
     const handleStudentLoginClick = () => {
         navigate('/login');
     };
+    const handleOrganisationLoginClick=()=>{
+      navigate('login-organisation');
+    };
 
     // Inline styles
   const styles = {
@@ -58,8 +61,10 @@ const Homepage = () => {
         >
           Student Login
         </button>
-        <button style={{ ...styles.button, ...styles.buttonPink }}>
-          Organization Login
+        <button style={{ ...styles.button, ...styles.buttonPink }}
+          onClick={handleOrganisationLoginClick}
+        >
+          Organisation Login
         </button>
         <button style={{ ...styles.button, ...styles.buttonPink }}>
           Supervisor Login

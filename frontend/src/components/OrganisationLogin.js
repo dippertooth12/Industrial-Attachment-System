@@ -27,8 +27,9 @@ const OrganisationLogin = () => {
 
       if (response.ok) {
         setMessage('Login successful!');
-        localStorage.setItem("organisation_id", data.organisation_id); // Store login state if needed
-        navigate("/dashboard"); // Redirect to dashboard on successful login
+        localStorage.setItem("organisation_id", data.organisation_id);
+        localStorage.setItem("contact_email", formData.contact_email); // ✅ Save email for dashboard
+        navigate("/organisation-dashboard");
       } else {
         setMessage(data.error || 'Login failed');
       }

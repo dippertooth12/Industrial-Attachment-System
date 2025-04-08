@@ -18,11 +18,11 @@ urlpatterns = [
     # Student Routes
     path('register/student/', register_student, name='register_student'),
     path('login/student/', login_student, name='login_student'),
-    path('student/preferences/', create_student_preference, name='create_student_preference'),
+    path('student-preference/', create_student_preference, name='create_student_preference'),
 
     # Organisation Routes
-    path('register/organisation/', register_organisation, name='register_organisation'),
-    path('login/organisation/', login_organisation, name='login_organisation'),
+    path('register-organisation/', register_organisation, name='register_organisation'),
+    path('login-organisation/', login_organisation, name='login_organisation'),
     path('organisation/<int:org_id>/preferences/', list_organisation_preferences, name='list_organisation_preferences'),
     path('organisation/<int:org_id>/preferences/create/', create_organisation_preference, name='create_organisation_preference'),
     path('organisation/preferences/preferred-field/', add_preferred_field, name='add_preferred_field'),
@@ -34,5 +34,6 @@ urlpatterns = [
 
     # Optional frontend entry point
     path('dashboard/', TemplateView.as_view(template_name="index.html"), name='dashboard'),
+    
 ]
     

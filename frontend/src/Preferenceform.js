@@ -84,16 +84,16 @@ const StudentPreferenceForm = () => {
           style={styles.input}
         />
 
-        <h4>Select Preferred Industries:</h4>
-        {industryOptions.map((industry) => (
-          <label key={industry.industry_id} style={styles.checkboxLabel}>
-            <input
-              type="checkbox"
-              onChange={() => handleCheckboxChange("industries", industry.industry_id)}
-            />
-            {industry.name}
-          </label>
-        ))}
+<h4>Select Preferred Industries:</h4>
+{industryOptions.map((industry) => (
+  <label key={industry.industry_id} style={styles.checkboxLabel}>
+    <input
+      type="checkbox"
+      onChange={() => handleCheckboxChange("industries", industry.industry_id)}
+    />
+    {industry.industry_name}
+  </label>
+))}
 
         <h4>Select Desired Skills:</h4>
         {skillOptions.map((skill) => (

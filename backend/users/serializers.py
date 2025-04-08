@@ -69,26 +69,29 @@ class OrganisationPreferenceSerializer(serializers.ModelSerializer):
 
         preference = OrganisationPreference.objects.create(**validated_data)
 
-        for field_name in preferred_fields_data:
-         PreferredField.objects.create(preference=preference, field_name=field_name)
+    # Add Preferred Fields
+        for field_id in preferred_fields_data:
+            PreferredField.objects.create(preference=preference, field_name=str(field_id))  # You can adjust as needed
 
-        for skill_name in required_skills_data:
-            RequiredSkill.objects.create(preference=preference, skill_name=skill_name)
+    # Add Required Skills by FK
+        for skill_id in required_skills_data:
+            try:
+                skill = Skill.objects.get(skill_id=skill_id)
+                RequiredSkill.objects.create(preference=preference, skill=skill)
+            except Skill.DoesNotExist:
+                continue  # Skip if skill not found
 
         return preference
 
-    def get_preferred_fields_names(self, obj):
-        return [field.field_name for field in obj.preferred_fields.all()]
-
-    def get_required_skills_names(self, obj):
-        return [skill.skill_name for skill in obj.required_skills.all()]    
-
 class StudentPreferenceSerializer(serializers.ModelSerializer):
     preferred_industries = serializers.ListField(
-        child=serializers.IntegerField(), write_only=True, required=False
+        child=serializers.CharField(),  
+        required=False
     )
     desired_skills = serializers.ListField(
-        child=serializers.CharField(), write_only=True, required=False
+        child=serializers.CharField(),
+        write_only=True,
+        required=False
     )
     industry_names = serializers.SerializerMethodField()
     skill_names = serializers.SerializerMethodField()
@@ -115,13 +118,16 @@ class StudentPreferenceSerializer(serializers.ModelSerializer):
 
         for industry_id in industries:
             try:
-                industry = Industry.objects.get(pk=industry_id)
+                industry = Industry.objects.get(pk=industry_id)  # pk is fine if CharField is primary
                 PreferredIndustry.objects.create(student_pref=preference, industry=industry)
             except Industry.DoesNotExist:
                 continue
 
         for skill_name in skills:
-            skill, created = Skill.objects.get_or_create(name=skill_name)
+            skill, _ = Skill.objects.get_or_create(
+                name=skill_name,
+                defaults={"skill_id": skill_name.lower().replace(" ", "_")}
+            )
             DesiredSkill.objects.create(student_pref=preference, skill=skill)
 
         return preference
