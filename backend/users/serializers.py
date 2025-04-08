@@ -32,6 +32,11 @@ class OrganisationPreferenceSerializer(serializers.ModelSerializer):
     organisation_name = serializers.CharField(source='organisation.org_name', read_only=True)
     preferred_fields_names = serializers.SerializerMethodField(read_only=True)
     required_skills_names = serializers.SerializerMethodField(read_only=True)
+    
+    organisation = serializers.PrimaryKeyRelatedField(
+        queryset=Organisation.objects.all(),
+        pk_field=serializers.IntegerField()
+    )
 
     class Meta:
         model = OrganisationPreference
@@ -53,15 +58,28 @@ class OrganisationPreferenceSerializer(serializers.ModelSerializer):
         preferred_fields_data = validated_data.pop('preferred_fields', [])
         required_skills_data = validated_data.pop('required_skills', [])
 
-        preference = OrganisationPreference.objects.create(**validated_data)
+        # Get the organization instance
+        organisation = validated_data['organisation']
+        
+        # Create the preference with the organization's org_id
+        preference = OrganisationPreference.objects.create(
+            organisation_id=organisation.org_id,
+            **validated_data
+        )
 
         for field_id in preferred_fields_data:
-            field = PreferredField.objects.get(id=field_id)
-            preference.preferred_fields.add(field)
+            try:
+                field = PreferredField.objects.get(id=field_id)
+                preference.preferred_fields.add(field)
+            except PreferredField.DoesNotExist:
+                continue
 
         for skill_id in required_skills_data:
-            skill = RequiredSkill.objects.get(id=skill_id)
-            preference.required_skills.add(skill)
+            try:
+                skill = RequiredSkill.objects.get(id=skill_id)
+                preference.required_skills.add(skill)
+            except RequiredSkill.DoesNotExist:
+                continue
 
         return preference
 
@@ -69,9 +87,8 @@ class OrganisationPreferenceSerializer(serializers.ModelSerializer):
         return [field.field_name for field in obj.preferred_fields.all()]
 
     def get_required_skills_names(self, obj):
-        return [skill.skill_name for skill in obj.required_skills.all()]
-
-
+        return [skill.skill_name for skill in obj.required_skills.all()]    
+    
 class PreferredFieldSerializer(serializers.ModelSerializer):
     class Meta:
         model = PreferredField

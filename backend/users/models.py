@@ -55,4 +55,3 @@ class RequiredSkill(models.Model):
     skill_id = models.AutoField(primary_key=True)
     preference = models.ForeignKey(OrganisationPreference, on_delete=models.CASCADE, related_name='required_skills')
     skill_name = models.CharField(max_length=100)
-

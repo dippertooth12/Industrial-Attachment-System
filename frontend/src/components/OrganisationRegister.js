@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const OrganisationRegister = () => {
   const [formData, setFormData] = useState({
@@ -15,6 +16,7 @@ const OrganisationRegister = () => {
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const industries = ["Software", "Healthcare", "Finance", "Education"];
 
@@ -30,21 +32,11 @@ const OrganisationRegister = () => {
     try {
       const response = await axios.post("http://127.0.0.1:8000/api/register-organisation/", formData);
       
-      // Store organisation_id
       localStorage.setItem("organisation_id", response.data.organisation.id);
       localStorage.setItem("contact_email", response.data.organisation.contact_email);
 
       setMessage("Organisation registered successfully!");
-      setFormData({
-        org_name: '',
-        industry_name: '',
-        town: '',
-        street: '',
-        plot_number: '',
-        contact_number: '',
-        contact_email: '',
-        password: '',
-      });
+      navigate("/organisation-dashboard");
     } catch (err) {
       setError(err.response?.data?.error || "Registration failed.");
     }

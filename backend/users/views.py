@@ -105,22 +105,23 @@ def register_organisation(request):
 
 
 # Organisation Login
+# views.py
 @api_view(['POST'])
 def login_organisation(request):
-    contact_email = request.data.get("contact_email")
+    email = request.data.get("contact_email")
     password = request.data.get("password")
+    
     try:
-        organisation = Organisation.objects.get(contact_email=contact_email)
-        if check_password(password, organisation.password):
+        org = Organisation.objects.get(contact_email=email)
+        if check_password(password, org.password):
             return Response({
-                "message": "Organisation login successful",
-                "organisation_id": organisation.org_id
+                "message": "Login successful",
+                "organisation_id": org.org_id,  # Ensure this matches model
+                "org_id": org.org_id  # Add this for consistency
             }, status=status.HTTP_200_OK)
-        else:
-            return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
     except Organisation.DoesNotExist:
         return Response({"error": "Organisation not found"}, status=status.HTTP_404_NOT_FOUND)
-
 
 # Create Organisation Preference
 @api_view(['POST'])
@@ -130,12 +131,13 @@ def create_organisation_preference(request, org_id):
 
     try:
         try:
-            organisation = Organisation.objects.get(id=org_id)
+            # Change this line to use org_id instead of id
+            organisation = Organisation.objects.get(org_id=org_id)
         except Organisation.DoesNotExist:
             return Response({"error": "Organisation not found"}, status=status.HTTP_404_NOT_FOUND)
 
         data = request.data.copy()
-        data['organisation'] = organisation.id
+        data['organisation'] = organisation.org_id  # Use org_id here
 
         serializer = OrganisationPreferenceSerializer(data=data)
         if serializer.is_valid():
@@ -149,7 +151,6 @@ def create_organisation_preference(request, org_id):
 
     except Exception as e:
         return Response({"error": f"Server error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
 # List Preferences for Specific Organisation
 @api_view(['GET'])
@@ -194,7 +195,10 @@ def get_organisation_by_email(request, email):
     try:
         organisation = Organisation.objects.get(contact_email=email)
         serializer = OrganisationSerializer(organisation)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        # Add org_id to the response data
+        response_data = serializer.data
+        response_data['org_id'] = organisation.org_id
+        return Response(response_data, status=status.HTTP_200_OK)
     except Organisation.DoesNotExist:
         return Response({"error": "Organisation not found"}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:

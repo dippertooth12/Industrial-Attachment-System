@@ -40,33 +40,34 @@ const OrganisationPreferenceForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const organisationId = orgId || localStorage.getItem("organisation_id");
-    if (!organisationId) {
-      setErrorMessage("Organisation ID is missing.");
-      return;
+    
+    // Get ID from URL params first, then localStorage
+    const rawOrgId = orgId || localStorage.getItem("organisation_id");
+    
+    // Validate ID exists and is numeric
+    if (!rawOrgId || isNaN(parseInt(rawOrgId))) {
+        setErrorMessage("Invalid organisation session. Please login again.");
+        return;
     }
 
-    console.log("Submitting with org ID:", organisationId);
+    const organisationId = parseInt(rawOrgId);
 
     try {
-      await axios.post(
-        `http://localhost:8000/api/organisation/${organisationId}/preferences/create/`,
-        formData,
-        { headers: { 'Content-Type': 'application/json' } }
-      );
-
-      alert("Preference created successfully!");
-      navigate("/organisation-dashboard");
+        await axios.post(
+            `http://localhost:8000/api/organisation/${organisationId}/preferences/create/`,
+            {
+                ...formData,
+                organisation: organisationId,
+                preferred_fields: [],
+                required_skills: []
+            },
+            { headers: { "Content-Type": "application/json" } }
+        );
+        navigate("/organisation-dashboard");
     } catch (error) {
-      console.error("Submission error:", error.response?.data || error.message);
-      const msg =
-        error.response?.data?.error ||
-        JSON.stringify(error.response?.data) ||
-        "Error creating preference.";
-      setErrorMessage(msg);
+        setErrorMessage(error.response?.data?.error || "Submission failed");
     }
-  };
+};
 
   if (loading) {
     return <div style={styles.loading}>Loading organisation data...</div>;

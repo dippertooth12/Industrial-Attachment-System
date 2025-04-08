@@ -7,26 +7,38 @@ const OrganisationDashboard = () => {
 
   useEffect(() => {
     const orgEmail = localStorage.getItem("contact_email");
+    const orgId = localStorage.getItem("organisation_id") || localStorage.getItem("org_id");
 
-    if (!orgEmail) {
-      navigate("/login-organisation");
-    } else {
-      fetch(`http://127.0.0.1:8000/api/organisation/by-email/${orgEmail}`)
+    console.log("Current session:", { orgEmail, orgId });
+
+    if (!orgEmail || !orgId) {
+        navigate("/login-organisation");
+        return;
+    }
+
+    fetch(`http://127.0.0.1:8000/api/organisation/by-email/${orgEmail}`)
         .then(res => res.json())
         .then(data => {
-          console.log(data);
-          if (data.error) {
-            navigate("/login-organisation");
-          } else {
-            setOrganization(data);
-
-            // Also store org ID in localStorage for later use
-            localStorage.setItem("organisation_id", data.id);
-          }
+            if (data.error || !data.org_id) {
+                console.error("Invalid org data:", data);
+                navigate("/login-organisation");
+            } else {
+                // Verify the ID matches what we have in localStorage
+                if (data.org_id.toString() !== orgId.toString()) {
+                    console.warn("ID mismatch:", data.org_id, orgId);
+                    localStorage.removeItem("organisation_id");
+                    localStorage.removeItem("org_id");
+                    navigate("/login-organisation");
+                } else {
+                    setOrganization(data);
+                }
+            }
         })
-        .catch(() => navigate("/login-organisation"));
-    }
-  }, [navigate]);
+        .catch(err => {
+            console.error("Fetch error:", err);
+            navigate("/login-organisation");
+        });
+}, [navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem("contact_email");
@@ -48,9 +60,9 @@ const OrganisationDashboard = () => {
       <h2>Organisation Dashboard</h2>
       {organization ? (
         <div>
-          <h3>Welcome, {organization.name}</h3>
-          <p><strong>Email:</strong> {organization.email}</p>
-          <p><strong>Industry:</strong> {organization.industry}</p>
+          <h3>Welcome, {organization.org_name}</h3>
+          <p><strong>Email:</strong> {organization.contact_email}</p>
+          <p><strong>Industry:</strong> {organization.industry?.industry_name}</p>
           <p><strong>Town:</strong> {organization.town}</p>
           <p><strong>Contact Number:</strong> {organization.contact_number}</p>
 

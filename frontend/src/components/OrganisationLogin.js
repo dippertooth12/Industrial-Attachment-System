@@ -4,7 +4,6 @@ import axios from "axios";
 
 const OrganisationLogin = () => {
   const [formData, setFormData] = useState({ contact_email: '', password: '' });
-  const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -14,20 +13,18 @@ const OrganisationLogin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage('');
     setError('');
 
     try {
-      const response = await axios.post("http://127.0.0.1:8000/api/login-organisation/", formData, {
-        headers: { "Content-Type": "application/json" },
-      });
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/login-organisation/", 
+        formData,
+        { headers: { "Content-Type": "application/json" } }
+      );
 
-      setMessage("Login successful!");
-
-      // ✅ Store both organisation_id and contact_email
       localStorage.setItem("organisation_id", response.data.organisation_id);
+      localStorage.setItem("org_id", response.data.org_id);  // Add this
       localStorage.setItem("contact_email", formData.contact_email);
-
       navigate("/organisation-dashboard");
     } catch (err) {
       setError(err.response?.data?.error || "Invalid email or password.");
@@ -57,7 +54,6 @@ const OrganisationLogin = () => {
           style={styles.input}
         />
         <button type="submit" style={styles.button}>Login</button>
-        {message && <p style={{ ...styles.message, color: 'green' }}>{message}</p>}
         {error && <p style={{ ...styles.message, color: 'red' }}>{error}</p>}
       </form>
       <div style={styles.registerLinkContainer}>
@@ -68,6 +64,7 @@ const OrganisationLogin = () => {
     </div>
   );
 };
+
 
 const styles = {
   container: {
